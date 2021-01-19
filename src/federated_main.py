@@ -55,12 +55,13 @@ if __name__ == '__main__':
     else:
         exit('Error: unrecognized model')
 
+    local_weight_swarmID = save_weight(local_model.state_dict())
     accuracy_list, loss_list = [], []
     for round in range(args.global_round):
         global_weight = get_global_weight()
-        local_weight = get_local_weight()
+        local_weight = get_local_weight(local_weight_swarmID)
         new_weight, accuracy, loss = update_local(args, local_model, local_weight, global_weight)
-        save_weight(new_weight)
+        local_weight_swarmID = save_weight(new_weight)
         accuracy_list.append(accuracy)
         loss_list.append(loss)
     output(accuracy_list, loss_list)
