@@ -19,16 +19,17 @@ def get_dataset(args):
 
     apply_transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
 
-    train_dataset = datasets.MNIST(data_dir, train=True, download=False, transform=apply_transform)
+    train_dataset = datasets.MNIST(data_dir, train=True, download=True, transform=apply_transform)
 
-    test_dataset = datasets.MNIST(data_dir, train=False, download=False, transform=apply_transform)
+    test_dataset = datasets.MNIST(data_dir, train=False, download=True, transform=apply_transform)
 
-    if args.iid == "iid":
+    if args.iid:
         user_groups = mnist_iid(train_dataset, args.num_users)
-    elif args.unequal == "noniid":
-        user_groups = mnist_noniid(train_dataset, args.num_users)
     else:
-        user_groups = mnist_noniid_unequal(train_dataset, args.num_users)
+        if args.unequal:
+            user_groups = mnist_noniid(train_dataset, args.num_users)
+        else:
+            user_groups = mnist_noniid_unequal(train_dataset, args.num_users)
 
     return train_dataset, test_dataset, user_groups
 
@@ -49,21 +50,29 @@ def get_global_weight():
     """
         Get the previous node model weight or global model weight
     """
-    return None
+    # get weight from swarm and save to local path
+    w_file_path = None
+    w = torch.load(w_file_path)
+    return w
 
 
-def get_local_weight():
+def get_local_weight(swarmID):
     """
         Get the local weight from swarm
     """
-    return None
+    w_file_path = None
+    w = torch.load(w_file_path)
+    return w
 
 
-def save_weight():
+def save_weight(model_dict):
     """
         Save model weight to swarm
         Return swarm id
     """
+    path = "../weight/local_weight.tar"
+    torch.save(model_dict, path)
+    # upload local_weight.tar to swarm and get the swarm id
     swarmID = ""
     return swarmID
 
@@ -85,3 +94,10 @@ def output(args, accuracy_list, loss_list):
     plt.ylabel('Training accuracy')
     plt.xlabel('Communication Rounds')
     plt.savefig('fed_{}_idx:{}_acc.png'.format(args.model, args.idx))
+
+
+if __name__ == '__main__':
+    from options import args_parser
+
+    args = args_parser()
+    train_dataset, test_dataset, user_groups = get_dataset(args)
