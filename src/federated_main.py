@@ -30,14 +30,13 @@ def test_model(model, test_dataset):
     testloader = DataLoader(test_dataset, batch_size=64,
                             shuffle=False)
     correct, total = 0, 0
-    for batch_idx, (images, labels) in enumerate(testloader):
+    for images, labels in testloader:
         outputs = model(images)
         _, pred_labels = torch.max(outputs, 1)
         pred_labels = pred_labels.view(-1)
         correct += torch.sum(torch.eq(pred_labels, labels)).item()
         total += len(labels)
-    accuracy = correct / total
-    return accuracy
+    return correct / total
 
 
 if __name__ == '__main__':
@@ -57,7 +56,7 @@ if __name__ == '__main__':
 
     local_weight_swarmID = save_weight(local_model.state_dict())
     accuracy_list, loss_list = [], []
-    for round in range(args.global_round):
+    for _ in range(args.global_round):
         global_weight = get_global_weight()
         local_weight = get_local_weight(local_weight_swarmID)
         new_weight, accuracy, loss = update_local(args, local_model, local_weight, global_weight)

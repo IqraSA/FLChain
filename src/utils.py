@@ -25,11 +25,10 @@ def get_dataset(args):
 
     if args.iid:
         user_groups = mnist_iid(train_dataset, args.num_users)
+    elif args.unequal:
+        user_groups = mnist_noniid(train_dataset, args.num_users)
     else:
-        if args.unequal:
-            user_groups = mnist_noniid(train_dataset, args.num_users)
-        else:
-            user_groups = mnist_noniid_unequal(train_dataset, args.num_users)
+        user_groups = mnist_noniid_unequal(train_dataset, args.num_users)
 
     return train_dataset, test_dataset, user_groups
 
@@ -52,8 +51,7 @@ def get_global_weight():
     """
     # get weight from swarm and save to local path
     w_file_path = None
-    w = torch.load(w_file_path)
-    return w
+    return torch.load(w_file_path)
 
 
 def get_local_weight(swarmID):
@@ -61,8 +59,7 @@ def get_local_weight(swarmID):
         Get the local weight from swarm
     """
     w_file_path = None
-    w = torch.load(w_file_path)
-    return w
+    return torch.load(w_file_path)
 
 
 def save_weight(model_dict):
@@ -72,9 +69,7 @@ def save_weight(model_dict):
     """
     path = "../weight/local_weight.tar"
     torch.save(model_dict, path)
-    # upload local_weight.tar to swarm and get the swarm id
-    swarmID = ""
-    return swarmID
+    return ""
 
 
 def output(args, accuracy_list, loss_list):
