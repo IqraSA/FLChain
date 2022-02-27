@@ -27,5 +27,4 @@ def args_parser():
                         help='whether to use unequal data splits for  \
                         non-i.i.d setting (use 0 for equal splits)')
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()

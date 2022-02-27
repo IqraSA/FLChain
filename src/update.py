@@ -42,10 +42,18 @@ class LocalUpdate(object):
 
         trainloader = DataLoader(DatasetSplit(dataset, idxs_train),
                                  batch_size=batch_size, shuffle=True)
-        validloader = DataLoader(DatasetSplit(dataset, idxs_val),
-                                 batch_size=int(len(idxs_val) / 10), shuffle=False)
-        testloader = DataLoader(DatasetSplit(dataset, idxs_test),
-                                batch_size=int(len(idxs_test) / 10), shuffle=False)
+        validloader = DataLoader(
+            DatasetSplit(dataset, idxs_val),
+            batch_size=len(idxs_val) // 10,
+            shuffle=False,
+        )
+
+        testloader = DataLoader(
+            DatasetSplit(dataset, idxs_test),
+            batch_size=len(idxs_test) // 10,
+            shuffle=False,
+        )
+
         return trainloader, validloader, testloader
 
     def update_weights(self, model, epochs):
@@ -55,9 +63,9 @@ class LocalUpdate(object):
 
         optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=1e-4)
 
-        for iter in range(epochs):
+        for _ in range(epochs):
             batch_loss = []
-            for batch_idx, (images, labels) in enumerate(self.trainloader):
+            for images, labels in self.trainloader:
                 model.zero_grad()
                 log_probs = model(images)
                 loss = self.criterion(log_probs, labels)
@@ -75,7 +83,7 @@ class LocalUpdate(object):
         model.eval()
         loss, total, correct = 0.0, 0.0, 0.0
 
-        for batch_idx, (images, labels) in enumerate(self.testloader):
+        for images, labels in self.testloader:
             outputs = model(images)
             batch_loss = self.criterion(outputs, labels)
             loss += batch_loss.item()

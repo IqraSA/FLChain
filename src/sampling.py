@@ -14,7 +14,7 @@ def mnist_iid(dataset, num_users):
     :return: dict of image index
     """
     num_items = int(len(dataset) / num_users)
-    dict_users, all_idxs = {}, [i for i in range(len(dataset))]
+    dict_users, all_idxs = {}, list(range(len(dataset)))
     for i in range(num_users):
         dict_users[i] = set(np.random.choice(all_idxs, num_items,
                                              replace=False))
@@ -31,7 +31,7 @@ def mnist_noniid(dataset, num_users):
     """
     # 60,000 training imgs -->  200 imgs/shard X 300 shards
     num_shards, num_imgs = 200, 300
-    idx_shard = [i for i in range(num_shards)]
+    idx_shard = list(range(num_shards))
     dict_users = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards * num_imgs)
     labels = dataset.train_labels.numpy()
@@ -62,7 +62,7 @@ def mnist_noniid_unequal(dataset, num_users):
     """
     # 60,000 training imgs --> 50 imgs/shard X 1200 shards
     num_shards, num_imgs = 1200, 50
-    idx_shard = [i for i in range(num_shards)]
+    idx_shard = list(range(num_shards))
     dict_users = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards * num_imgs)
     labels = dataset.train_labels.numpy()
@@ -101,11 +101,10 @@ def mnist_noniid_unequal(dataset, num_users):
 
         # Next, randomly assign the remaining shards
         for i in range(num_users):
-            if len(idx_shard) == 0:
+            if not idx_shard:
                 continue
             shard_size = random_shard_size[i]
-            if shard_size > len(idx_shard):
-                shard_size = len(idx_shard)
+            shard_size = min(shard_size, len(idx_shard))
             rand_set = set(np.random.choice(idx_shard, shard_size,
                                             replace=False))
             idx_shard = list(set(idx_shard) - rand_set)
@@ -125,7 +124,7 @@ def mnist_noniid_unequal(dataset, num_users):
                     (dict_users[i], idxs[rand * num_imgs:(rand + 1) * num_imgs]),
                     axis=0)
 
-        if len(idx_shard) > 0:
+        if idx_shard:
             # Add the leftover shards to the client with minimum images:
             shard_size = len(idx_shard)
             # Add the remaining shard to the client with lowest data
